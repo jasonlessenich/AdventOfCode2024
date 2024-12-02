@@ -1,6 +1,8 @@
 name: aoc
-description: A starting point for Dart libraries or applications.
+description: Commonly used structure for running Advent of Code challenges.
 version: 1.0.0
+publish_to: none
+
 # repository: https://github.com/my_org/my_repo
 
 environment:
