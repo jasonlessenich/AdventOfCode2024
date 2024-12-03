@@ -7,5 +7,6 @@ void main(List<String> arguments) async {
     title: 'Mull It Over',
     sampleInputFile: 'input-sample.txt',
     inputFile: 'input.txt',
+    part2SampleInputFile: 'input-02-sample.txt'
   ).run(Day03Challenge());
 }
