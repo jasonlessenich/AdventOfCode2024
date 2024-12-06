@@ -11,6 +11,14 @@ enum Direction {
   southWest,
   west,
   northWest,
+  ;
+
+  static const List<Direction> diagonal = [
+    Direction.northEast,
+    Direction.southEast,
+    Direction.southWest,
+    Direction.northWest,
+  ];
 }
 
 class Point {
@@ -20,7 +28,7 @@ class Point {
   const Point(this.x, this.y);
 
   Point getAdjacent(Direction dir) {
-    return switch(dir) {
+    return switch (dir) {
       Direction.north => Point(x, y - 1),
       Direction.northEast => Point(x + 1, y - 1),
       Direction.east => Point(x + 1, y),
@@ -59,7 +67,8 @@ class WordSearch {
 
   /// Gets the first surrounding letter and returns the point and direction
   /// If there are multiple surrounding letters, only the first one is returned
-  (Point, Direction)? getSurroundingLetter(Point p, int letter, {List<Direction>? allowedDirections}) {
+  (Point, Direction)? getSurroundingLetter(Point p, int letter,
+      {List<Direction>? allowedDirections}) {
     for (Direction dir in allowedDirections ?? Direction.values) {
       final Point adjacent = p.getAdjacent(dir);
       if (getLetterAtPoint(adjacent) == letter) {
@@ -70,8 +79,9 @@ class WordSearch {
   }
 
   /// Gets all surrounding letters and returns their point and direction
-  List<(Point, Direction)> getAllSurroundingLetters(Point p, int letter) {
-    return Direction.values
+  List<(Point, Direction)> getAllSurroundingLetters(Point p, int letter,
+      {List<Direction>? allowedDirections}) {
+    return (allowedDirections ?? Direction.values)
         .map((dir) => getSurroundingLetter(p, letter, allowedDirections: [dir]))
         .where((element) => element != null)
         .map((e) => e!)
@@ -81,19 +91,23 @@ class WordSearch {
   /// Searches for the given word in the matrix
   List<List<Point>> searchWords(String word) {
     if (word.isEmpty || word.length <= 2) {
-      throw ArgumentError('Word may not be empty or shorter than 2 characters!');
+      throw ArgumentError(
+          'Word may not be empty or shorter than 2 characters!');
     }
     final List<List<Point>> result = [];
     final List<Point> startingLetters = searchLetters(word.codeUnits.first);
 
     for (Point startLetter in startingLetters) {
-      final List<(Point, Direction)> allSurroundingLetters = getAllSurroundingLetters(startLetter, word.codeUnits[1]);
+      final List<(Point, Direction)> allSurroundingLetters =
+          getAllSurroundingLetters(startLetter, word.codeUnits[1]);
 
       for (final (p, dir) in allSurroundingLetters) {
         List<Point> matches = [startLetter, p];
         // go through all letters one by one and check if the last match is surrounded by one
         for (int letter in word.codeUnits.skip(2)) {
-          final (Point, Direction)? nextSurrounding = getSurroundingLetter(matches.last, letter, allowedDirections: [dir]);
+          final (Point, Direction)? nextSurrounding = getSurroundingLetter(
+              matches.last, letter,
+              allowedDirections: [dir]);
           if (nextSurrounding == null) {
             // no surrounding letter found, so this is not a match
             matches = [];
@@ -133,6 +147,24 @@ class Day04Challenge implements AOCChallenge<int> {
 
   @override
   FutureOr<int> part2(String input, List<String> inputLines) {
-    throw UnimplementedError();
+    final search = WordSearch.fromInput(inputLines);
+    final List<Point> allAs = search.searchLetters('A'.codeUnitAt(0));
+
+    int acc = 0;
+    for (Point p in allAs) {
+      final nw = search.getLetterAtPoint(p.getAdjacent(Direction.northWest));
+      final se = search.getLetterAtPoint(p.getAdjacent(Direction.southEast));
+      final ne = search.getLetterAtPoint(p.getAdjacent(Direction.northEast));
+      final sw = search.getLetterAtPoint(p.getAdjacent(Direction.southWest));
+
+      // check if we have two M's & two S's and that the diagonals are not the same
+      if ([nw, se, ne, sw].where((e) => e == 'S'.codeUnitAt(0)).length == 2 &&
+          [nw, se, ne, sw].where((e) => e == 'M'.codeUnitAt(0)).length == 2 &&
+          (nw != se && ne != sw)) {
+        acc++;
+      }
+    }
+
+    return acc;
   }
 }
