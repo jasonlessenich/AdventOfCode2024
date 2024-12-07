@@ -1,0 +1,15 @@
+import 'dart:async';
+
+import 'package:aoc/aoc.dart';
+
+class Day${AOC_DAY_PADDED}Challenge implements AOCChallenge<int> {
+  @override
+  FutureOr<int> part1(String input, List<String> inputLines) {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureOr<int> part2(String input, List<String> inputLines) {
+    throw UnimplementedError();
+  }
+}

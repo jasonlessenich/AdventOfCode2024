@@ -1,0 +1,11 @@
+import 'package:aoc/aoc.dart';
+import 'package:day${AOC_DAY_PADDED}/day${AOC_DAY_PADDED}.dart';
+
+void main() {
+  AOC(
+    day: ${AOC_DAY},
+    title: '${AOC_TITLE}',
+    sampleInputFile: 'input-sample.txt',
+    inputFile: 'input.txt',
+  ).run(Day${AOC_DAY_PADDED}Challenge());
+}

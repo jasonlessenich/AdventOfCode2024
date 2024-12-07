@@ -1,0 +1,13 @@
+name: aoc_gen
+description: Generates template code for Advent of Code challenges
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  dcli: any
+
+dev_dependencies:
+  lints: ^4.0.0
