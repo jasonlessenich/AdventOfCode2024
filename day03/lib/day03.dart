@@ -44,8 +44,7 @@ class Day03Challenge implements AOCChallenge<int> {
 
       // simply join all matches together & sort by start
       for (final match in [...mulMatches, ...doMatches, ...dontMatches]
-        ..sort((a, b) => a.start.compareTo(b.start))
-      ) {
+        ..sort((a, b) => a.start.compareTo(b.start))) {
         final m = match.group(0);
         if (m == null) continue;
         // check if is either do or don't

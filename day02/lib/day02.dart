@@ -19,7 +19,8 @@ bool isValidLevel(List<int> level) {
     }
     isDecreasing ??= i < previousNum;
     // check if numbers are still decreasing
-    if ((isDecreasing && previousNum < i) || (!isDecreasing && previousNum > i)) {
+    if ((isDecreasing && previousNum < i) ||
+        (!isDecreasing && previousNum > i)) {
       return false;
     }
     // check diff between numbers
