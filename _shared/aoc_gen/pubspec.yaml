@@ -1,6 +1,6 @@
 name: aoc_gen
-description: Generates template code for Advent of Code challenges
-version: 0.0.1
+description: Generates a template dart project for Advent of Code challenges.
+version: 1.0.0
 publish_to: none
 
 environment:

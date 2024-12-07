@@ -1,2 +1,2 @@
 # aoc_gen
-Generates template code for Advent of Code challenges
+Generates a template dart project for Advent of Code challenges.
