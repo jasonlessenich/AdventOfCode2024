@@ -91,6 +91,10 @@ class GuardMap {
     return GuardMap(map);
   }
 
+  factory GuardMap.deepCopy(GuardMap map) {
+    return GuardMap(map._map.map((row) => row.map((e) => e).toList()).toList());
+  }
+
   bool checkBounds(Point p) {
     if (p.y < 0 || p.y >= _map.length) {
       return false;
@@ -137,6 +141,11 @@ int calculateSteps(GuardMap map) {
       lastPos = (lastPos.$1!.move(lastPos.$2), lastPos.$2);
     }
 
+    // if position and direction are already in the visited list, we have a loop
+    if (visited.any((e) => e.$1 == lastPos.$1 && e.$2 == lastPos.$2)) {
+      return -1;
+    }
+
     // count steps (only if we haven't visited this point before)
     if (!visited.any((e) => e.$1 == lastPos.$1)) {
       steps++;
@@ -155,6 +164,22 @@ class Day06Challenge implements AOCChallenge<int> {
 
   @override
   FutureOr<int> part2(String input, List<String> inputLines) {
-    throw UnimplementedError();
+    final GuardMap map = GuardMap.fromInput(inputLines);
+
+    int loopsFound = 0;
+    for (int y = 0; y < inputLines.length; y++) {
+      for (int x = 0; x < inputLines[y].length; x++) {
+        // set obstacles
+        final GuardMap newMap = GuardMap.deepCopy(map);
+        if (newMap._map[y][x] == Tile.empty) {
+          newMap._map[y][x] = Tile.obstacle;
+        }
+
+        loopsFound += (calculateSteps(newMap) == -1 ? 1 : 0);
+        print('$loopsFound, ($x, $y)');
+      }
+    }
+
+    return loopsFound;
   }
 }
