@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:isolate';
 
 import 'package:aoc/aoc.dart';
 
@@ -126,8 +126,8 @@ class GuardMap {
   }
 }
 
-int calculateSteps(GuardMap map) {
-  int steps = 0;
+List<Point>? calculateSteps(GuardMap map) {
+  List<Point> steps = [];
   (Point?, Direction) lastPos = map.getGuardPosition();
   List<(Point, Direction)> visited = [(lastPos.$1!, lastPos.$2)];
   while (map.checkBounds(lastPos.$1!)) {
@@ -143,12 +143,12 @@ int calculateSteps(GuardMap map) {
 
     // if position and direction are already in the visited list, we have a loop
     if (visited.any((e) => e.$1 == lastPos.$1 && e.$2 == lastPos.$2)) {
-      return -1;
+      return null;
     }
 
     // count steps (only if we haven't visited this point before)
     if (!visited.any((e) => e.$1 == lastPos.$1)) {
-      steps++;
+      steps.add(lastPos.$1!);
       visited.add((lastPos.$1!, lastPos.$2));
     }
   }
@@ -159,27 +159,44 @@ class Day06Challenge implements AOCChallenge<int> {
   @override
   FutureOr<int> part1(String input, List<String> inputLines) {
     final GuardMap map = GuardMap.fromInput(inputLines);
-    return calculateSteps(map);
+    return calculateSteps(map)!.length;
   }
 
   @override
-  FutureOr<int> part2(String input, List<String> inputLines) {
+  FutureOr<int> part2(String input, List<String> inputLines) async {
     final GuardMap map = GuardMap.fromInput(inputLines);
 
-    int loopsFound = 0;
-    for (int y = 0; y < inputLines.length; y++) {
-      for (int x = 0; x < inputLines[y].length; x++) {
-        // set obstacles
+    void _bruteForceLoopOnXY(List<dynamic> args) {
+      final int y = args[0];
+      final SendPort sendPort = args[1];
+
+      final List<int> results = [];
+      for (int x = 0; x < map._map[y].length; x++) {
         final GuardMap newMap = GuardMap.deepCopy(map);
         if (newMap._map[y][x] == Tile.empty) {
           newMap._map[y][x] = Tile.obstacle;
         }
-
-        loopsFound += (calculateSteps(newMap) == -1 ? 1 : 0);
-        print('$loopsFound, ($x, $y)');
+        final int loops = (calculateSteps(newMap) == null ? 1 : 0);
+        if (loops == 1) {
+          print('Found loop at $x, $y');
+        }
+        results.add(loops);
       }
+      sendPort.send(results);
     }
 
-    return loopsFound;
+    Future<List<int>> spawnOnY(int y) async {
+      final receivePort = ReceivePort();
+      await Isolate.spawn(_bruteForceLoopOnXY, [y, receivePort.sendPort]);
+      return await receivePort.first;
+    }
+
+    final List<Future<List<int>>> futures = [];
+    for (int y = 0; y < inputLines.length; y++) {
+      futures.add(spawnOnY(y));
+    }
+
+    final List<List<int>> results = await Future.wait(futures);
+    return results.expand((i) => i).reduce((a, b) => a + b);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:aoc/src/aoc_challenge.dart';
 import 'dart:io';
 
@@ -22,18 +24,20 @@ class AOC {
     print('--- Day $day: $title ---');
     final sampleInput = await _readInput(sampleInputFile);
     final part1Input = await _readInput(inputFile);
-    _runTask('part1 (sample)', sampleInputFile,
+    // run part 1
+    await _runTask('part1 (sample)', sampleInputFile,
         () => challenge.part1(sampleInput.$1, sampleInput.$2));
-    _runTask('part1', inputFile,
+    await _runTask('part1', inputFile,
         () => challenge.part1(part1Input.$1, part1Input.$2));
 
     final part2SampleInput = part2SampleInputFile != null
         ? await _readInput(part2SampleInputFile!)
         : sampleInput;
     final part2Input = await _readInput(part2InputFile ?? inputFile);
-    _runTask('part2 (sample)', part2SampleInputFile ?? sampleInputFile,
+    // run part 2
+    await _runTask('part2 (sample)', part2SampleInputFile ?? sampleInputFile,
         () => challenge.part2(part2SampleInput.$1, part2SampleInput.$2));
-    _runTask('part2', part2InputFile ?? inputFile,
+    await _runTask('part2', part2InputFile ?? inputFile,
         () => challenge.part2(part2Input.$1, part2Input.$2));
   }
 
@@ -48,12 +52,12 @@ class AOC {
     return (input, inputLines);
   }
 
-  void _runTask<T>(String name, String file, T Function() task) {
+  Future<void> _runTask<T>(String name, String file, FutureOr<T> Function() task) async {
     print('Running $name with input: $file');
     final Stopwatch stopwatch = Stopwatch()..start();
     late T result;
     try {
-      result = task();
+      result = await task();
     } on UnimplementedError {
       print('$name = Not implemented\n');
       return;
