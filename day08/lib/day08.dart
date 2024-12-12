@@ -45,7 +45,7 @@ class AntennaMap {
 
   bool isInBounds(Vector v) => v.x >= 0 && v.x < matrix[0].length && v.y >= 0 && v.y < matrix.length;
 
-  Set<Vector> calculateAntiNodes(List<Vector> antennas) {
+  Set<Vector> calculateAntiNodes(List<Vector> antennas, {bool respectEffectsOfResonantHarmonics = false}) {
     final List<Vector> nodes = [];
     int antennaIndex = 0;
 
@@ -54,7 +54,19 @@ class AntennaMap {
       for (int j = 0; j < antennas.length; j++) {
         if (j == antennaIndex) continue;
         final Vector end = antennas[j];
-        nodes.add(end + (end - antennas[antennaIndex]));
+        final Vector diff = (end - antennas[antennaIndex]);
+        if (respectEffectsOfResonantHarmonics) {
+          // add current end node
+          nodes.add(end);
+          // add all multiples of diff until out of bounds
+          Vector pos = end + diff;
+          while (isInBounds(pos)) {
+            nodes.add(pos);
+            pos = pos + diff;
+          }
+        } else {
+          nodes.add(end + diff);
+        }
       }
       antennaIndex++;
     }
@@ -75,6 +87,11 @@ class Day08Challenge implements AOCChallenge<int> {
 
   @override
   FutureOr<int> part2(String input, List<String> inputLines) {
-    throw UnimplementedError();
+    final map = AntennaMap.fromInput(inputLines);
+    return map.getGroupedAntennas().entries
+        .map((e) => map.calculateAntiNodes(e.value, respectEffectsOfResonantHarmonics: true))
+        .expand((e) => e)
+        .toSet()
+        .length;
   }
 }
