@@ -1,17 +1,20 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:aoc/aoc.dart';
 
 enum Operator {
   add,
   multiply,
+  concatenate
   ;
 
   int apply(int a, int b) {
     return switch (this) {
       Operator.add => a + b,
       Operator.multiply => a * b,
+      Operator.concatenate => int.parse('$a$b')
     };
   }
 }
@@ -38,20 +41,21 @@ class Equation {
   }
 }
 
-List<List<Operator>> getPossibleCombinations(int size) {
-  final List<List<Operator>> ops = [];
-  final int possibleSolutions = 2 << (size - 1);
+List<List<Operator>> getPossibleCombinations(int size, List<Operator> ops) {
+  final List<List<Operator>> result = [];
+  final num possibleSolutions = pow(ops.length, size);
 
   for (int i = 0; i < possibleSolutions; i++) {
-    final List<Operator> solution = [];
-    for (int j = 0; j < size; j++) {
-      // if the j-th bit is 0, add, otherwise multiply
-      solution.add(i & (1 << j) == 0 ? Operator.add : Operator.multiply);
+    final List<Operator> combination = [];
+    int j = i;
+    for (int k = 0; k < size; k++) {
+      combination.add(ops[j % ops.length]);
+      j ~/= ops.length;
     }
-    ops.add(solution);
+    result.add(combination);
   }
 
-  return ops;
+  return result;
 }
 
 List<Equation> parseEquations(List<String> lines) {
@@ -74,13 +78,17 @@ class Day07Challenge implements AOCChallenge<int> {
   FutureOr<int> part1(String input, List<String> inputLines) {
     final List<Equation> equations = parseEquations(inputLines);
     return equations
-        .where((e) => getPossibleCombinations(e.operatorPositions).any((c) => e.isValid(c)))
+        .where((e) => getPossibleCombinations(e.operatorPositions, [Operator.add, Operator.multiply]).any((c) => e.isValid(c)))
         .map((e) => e.result)
         .fold<int>(0, (a, b) => a + b);
   }
 
   @override
   FutureOr<int> part2(String input, List<String> inputLines) {
-    throw UnimplementedError();
+    final List<Equation> equations = parseEquations(inputLines);
+    return equations
+        .where((e) => getPossibleCombinations(e.operatorPositions, Operator.values).any((c) => e.isValid(c)))
+        .map((e) => e.result)
+        .fold<int>(0, (a, b) => a + b);
   }
 }
