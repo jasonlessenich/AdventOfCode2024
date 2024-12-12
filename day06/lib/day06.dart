@@ -172,33 +172,29 @@ class Day06Challenge implements AOCChallenge<int> {
       final int y = args[0];
       final SendPort sendPort = args[1];
 
-      final List<int> results = [];
+      int loops = 0;
       for (int x = 0; x < map._map[y].length; x++) {
         final GuardMap newMap = GuardMap.deepCopy(map);
         if (newMap._map[y][x] == Tile.empty) {
           newMap._map[y][x] = Tile.obstacle;
         }
-        final int loops = (calculateSteps(newMap) == null ? 1 : 0);
-        if (loops == 1) {
-          print('Found loop at $x, $y');
-        }
-        results.add(loops);
+        loops += calculateSteps(newMap) == null ? 1 : 0;
       }
-      sendPort.send(results);
+      sendPort.send(loops);
     }
 
-    Future<List<int>> spawnOnY(int y) async {
+    Future<int> spawnOnY(int y) async {
       final receivePort = ReceivePort();
       await Isolate.spawn(_bruteForceLoopOnXY, [y, receivePort.sendPort]);
       return await receivePort.first;
     }
 
-    final List<Future<List<int>>> futures = [];
+    final List<Future<int>> futures = [];
     for (int y = 0; y < inputLines.length; y++) {
       futures.add(spawnOnY(y));
     }
 
-    final List<List<int>> results = await Future.wait(futures);
-    return results.expand((i) => i).reduce((a, b) => a + b);
+    final List<int> results = await Future.wait(futures);
+    return results.reduce((v, e) => v + e);
   }
 }
