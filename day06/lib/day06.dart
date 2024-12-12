@@ -131,11 +131,13 @@ List<Point>? calculateSteps(GuardMap map) {
   (Point?, Direction) lastPos = map.getGuardPosition();
   List<(Point, Direction)> visited = [(lastPos.$1!, lastPos.$2)];
   while (map.checkBounds(lastPos.$1!)) {
-    final nextPos = lastPos.$1!.move(lastPos.$2);
 
     // rotate 90 degrees when encountering an obstacle
-    if (map.getTileAtPoint(nextPos) == Tile.obstacle) {
-      final Direction newDir = lastPos.$2.rotate();
+    if (map.getTileAtPoint(lastPos.$1!.move(lastPos.$2)) == Tile.obstacle) {
+      Direction newDir = lastPos.$2.rotate();
+      if (map.getTileAtPoint(lastPos.$1!.move(lastPos.$2.rotate())) == Tile.obstacle) {
+        newDir = newDir.rotate();
+      }
       lastPos = (lastPos.$1!.move(newDir), newDir);
     } else {
       lastPos = (lastPos.$1!.move(lastPos.$2), lastPos.$2);
